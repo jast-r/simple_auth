@@ -8,6 +8,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const (
+	db_name    = "simple_auth"
+	usersCol   = "users"
+	companyCol = "company"
+)
+
 type ConfigDB struct {
 	Host     string
 	Port     string

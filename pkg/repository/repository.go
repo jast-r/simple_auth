@@ -1,16 +1,25 @@
 package repository
 
-type Authorization struct {
+import (
+	simpleauth "github.com/jast-r/simple-auth"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+type Authorization interface {
+	CreateUser(simpleauth.User) error
+	GetUser(username, password string) (simpleauth.User, error)
 }
 
-type CompanyList struct {
+type Company struct {
 }
 
 type Repository struct {
 	Authorization
-	CompanyList
+	Company
 }
 
-func NewRepository() *Repository {
-	return &Repository{}
+func NewRepository(db *mongo.Database) *Repository {
+	return &Repository{
+		Authorization: NewAuthMongo(db),
+	}
 }

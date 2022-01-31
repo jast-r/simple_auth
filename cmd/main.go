@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"log"
 
 	simpleauth "github.com/jast-r/simple-auth"
@@ -12,23 +10,25 @@ import (
 	"github.com/spf13/viper"
 )
 
+type Test struct {
+	Name string
+}
+
 func main() {
 	if err := initConfig(); err != nil {
 		log.Fatalf("error init config: %v", err)
 	}
 
 	db, err := repository.NewMongoDB(repository.ConfigDB{
-		Host: "localhost",
-		Port: "27017",
+		Host: viper.GetString("db.host"),
+		Port: viper.GetString("db.port"),
 	})
 
 	if err != nil {
 		log.Fatalf("init db failed: %v", err)
 	}
 
-	fmt.Println(db.ListDatabases(context.TODO(), nil))
-
-	repos := repository.NewRepository()
+	repos := repository.NewRepository(db.Database(viper.GetString("db.name")))
 	service := service.NewService(repos)
 	handlers := handler.NewHandler(service)
 
@@ -41,6 +41,6 @@ func main() {
 
 func initConfig() error {
 	viper.AddConfigPath("configs")
-	viper.SetConfigFile("config")
+	viper.SetConfigName("config")
 	return viper.ReadInConfig()
 }
