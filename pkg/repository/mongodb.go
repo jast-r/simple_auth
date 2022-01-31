@@ -23,7 +23,11 @@ type ConfigDB struct {
 }
 
 func NewMongoDB(cfg ConfigDB) (*mongo.Client, error) {
-	db, err := mongo.NewClient(options.Client().ApplyURI(getURI(cfg.Host, cfg.Port, cfg.Username, cfg.Password)))
+	db, err := mongo.NewClient(options.Client().ApplyURI(getURI(cfg.Host, cfg.Port, cfg.Username, cfg.Password)),
+		options.Client().SetAuth(options.Credential{
+			Username: cfg.Username,
+			Password: cfg.Password,
+		}))
 	if err != nil {
 		log.Fatalf("create mongo client failed: %v", err)
 	}

@@ -1,8 +1,8 @@
 port: "8000"
 
 db: 
-  host: "localhost"
-  port: "27017"
-  username: ""
-  password: ""
-  name: "simple_auth"
+  host: "rc1b-ehoqrohmh8oi0qdj.mdb.yandexcloud.net"
+  port: "27018"
+  username: "userm"
+  password: "JFCZg7sBrB"
+  name: "db1"
