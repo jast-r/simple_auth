@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,11 +24,9 @@ type ConfigDB struct {
 }
 
 func NewMongoDB(cfg ConfigDB) (*mongo.Client, error) {
-	db, err := mongo.NewClient(options.Client().ApplyURI(getURI(cfg.Host, cfg.Port, cfg.Username, cfg.Password)),
-		options.Client().SetAuth(options.Credential{
-			Username: cfg.Username,
-			Password: cfg.Password,
-		}))
+	var dbOptions options.ClientOptions
+	dbOptions.ApplyURI(getURI(cfg.Host, cfg.Port, cfg.Username, cfg.Password))
+	db, err := mongo.NewClient(&dbOptions)
 	if err != nil {
 		log.Fatalf("create mongo client failed: %v", err)
 	}
@@ -47,6 +46,7 @@ func NewMongoDB(cfg ConfigDB) (*mongo.Client, error) {
 }
 
 func getURI(host, port, username, password string) string {
-	mongoURI := "mongodb://" + host + ":" + port
+	mongoURI := "mongodb://" + username + ":" + password + "@" + host + ":" + port
+	fmt.Println(mongoURI)
 	return mongoURI
 }

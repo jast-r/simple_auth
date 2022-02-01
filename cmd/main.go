@@ -20,8 +20,10 @@ func main() {
 	}
 
 	db, err := repository.NewMongoDB(repository.ConfigDB{
-		Host: viper.GetString("db.host"),
-		Port: viper.GetString("db.port"),
+		Host:     viper.GetString("db.host"),
+		Port:     viper.GetString("db.port"),
+		Username: viper.GetString("db.username"),
+		Password: viper.GetString("db.password"),
 	})
 
 	if err != nil {
