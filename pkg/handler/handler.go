@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/jast-r/simple-auth/pkg/service"
 )
@@ -15,16 +13,8 @@ func NewHandler(services *service.Service) *Handler {
 	return &Handler{services: services}
 }
 
-func testFunc(ctx *gin.Context) {
-	fmt.Sprint("Hello world!")
-}
-
 func (h *Handler) InitRoutes() *gin.Engine {
 	routers := gin.New()
-	test := routers.Group("")
-	{
-		test.GET("/", testFunc)
-	}
 	auth := routers.Group("/auth")
 	{
 		auth.POST("/sign_up", h.signUp)

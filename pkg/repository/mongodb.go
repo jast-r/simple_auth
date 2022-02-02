@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -16,11 +17,13 @@ const (
 )
 
 type ConfigDB struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	URI      string
+	Host        string
+	Port        string
+	Username    string
+	Password    string
+	URI         string
+	DBName      string
+	Collections []string
 }
 
 func NewMongoDB(cfg ConfigDB) (*mongo.Client, error) {
@@ -42,11 +45,56 @@ func NewMongoDB(cfg ConfigDB) (*mongo.Client, error) {
 
 	log.Println("connect to Mongo succeed!")
 
+	checkColl(db, cfg.DBName, cfg.Collections)
+
 	return db, err
 }
 
+func checkColl(client *mongo.Client, dbName string, collections []string) error {
+	var err error
+	collExist := false
+	userIndex := mongo.IndexModel{
+		Keys: bson.M{
+			"username": 1,
+		}, Options: options.Index().SetUnique(true),
+	}
+	collName, err := client.Database(dbName).ListCollectionNames(
+		context.TODO(),
+		bson.D{})
+	if err != nil {
+		return err
+	}
+
+	for _, coll := range collections {
+		for _, collDB := range collName {
+			if coll == collDB {
+				collExist = true
+			}
+		}
+		if !collExist {
+			err = client.Database(dbName).CreateCollection(context.TODO(), coll, nil)
+			if err != nil {
+				return err
+			}
+			if coll == usersCol {
+				_, err = client.Database(dbName).Collection(coll).Indexes().CreateOne(context.TODO(), userIndex)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return err
+}
+
 func getURI(host, port, username, password string) string {
-	mongoURI := "mongodb://" + username + ":" + password + "@" + host + ":" + port
+	var mongoURI string
+	if username != "" && password != "" {
+		mongoURI = "mongodb://" + username + ":" + password + "@" + host + ":" + port
+	} else {
+		mongoURI = "mongodb://" + host + ":" + port
+	}
 	fmt.Println(mongoURI)
 	return mongoURI
 }

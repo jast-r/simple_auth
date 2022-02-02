@@ -21,6 +21,9 @@ func NewAuthMongo(db *mongo.Database) *AuthMongo {
 func (r *AuthMongo) CreateUser(user simpleauth.User) error {
 	res, err := r.db.Collection(usersCol).InsertOne(context.TODO(), user)
 	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			err = fmt.Errorf("user %s already exists", user.Username)
+		}
 		logrus.Printf("insert failed: %v", err)
 		return err
 	}
@@ -32,7 +35,12 @@ func (r *AuthMongo) GetUser(username, password string) (simpleauth.User, error) 
 	var user simpleauth.User
 	err := r.db.Collection(usersCol).FindOne(context.TODO(), bson.M{"username": username, "password": password}).Decode(&user)
 	if err != nil {
-		logrus.Error("failed decode user", err)
+		if err == mongo.ErrNoDocuments {
+			err = fmt.Errorf("user %s not registered", username)
+			logrus.Errorf(err.Error())
+		} else {
+			logrus.Errorf("failed decode user: %v", err)
+		}
 	}
 	return user, err
 }
