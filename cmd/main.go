@@ -44,7 +44,7 @@ func main() {
 }
 
 func initConfig() error {
-	viper.AddConfigPath("configs")
+	viper.AddConfigPath("/opt/simple_auth/configs")
 	viper.SetConfigName("config")
 	return viper.ReadInConfig()
 }
